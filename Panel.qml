@@ -74,7 +74,7 @@ Panel {
     bar: root.bar
     text: root.unreadCount > 0 ? ("OMACOM: " + root.unreadCount + " NEW") : "OMACOM: NEWS"
     tooltipText: "Omacom Foundation News Hub\nLatest: " + root.latestTitle + "\nDate: " + root.latestDate + "\nUnread: " + root.unreadCount + "\nEngine: Native Rust"
-    onClicked: root.toggle()
+    onPressed: function(b) { if (root.opened) root.close(); else root.open(); }
   }
 
   KeyboardPanel {
