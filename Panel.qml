@@ -44,8 +44,8 @@ Panel {
   }
 
   Component.onDestruction: {
-    if (engineProc.running) engineProc.kill()
-    if (actionProc.running) actionProc.kill()
+    if (engineProc.running) engineProc.running = false
+    if (actionProc.running) actionProc.running = false
   }
 
   function sendCmd(arg, param) {
