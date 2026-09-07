@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "ozdil.omacom-news",
+  "name": "Omacom News",
+  "version": "1.1.0",
+  "author": "Ozan Özdil (ozdil)",
+  "license": "MIT",
+  "description": "Official Omacom Foundation news dispatches, announcements, and desktop notifications for Omarchy.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Omacom News",
+    "description": "Omacom Foundation news and desktop notification center.",
+    "category": "System",
+    "defaultSection": "right",
+    "aliases": ["news", "omacom", "foundation", "announcements", "omacom-news"],
+    "allowMultiple": false
+  }
+}
