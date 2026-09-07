@@ -68,12 +68,14 @@ Panel {
     }
   }
 
-  WidgetButton {
+  BarIconButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.unreadCount > 0 ? ("OMACOM: " + root.unreadCount + " NEW") : "OMACOM: NEWS"
-    tooltipText: "Omacom Foundation News Hub\nLatest: " + root.latestTitle + "\nDate: " + root.latestDate + "\nUnread: " + root.unreadCount + "\nEngine: Native Rust"
+    text: "\uf0ba0"
+    foreground: root.unreadCount > 0 ? "#38bdf8" : (root.bar ? root.bar.foreground : Color.foreground)
+    slotSize: Style.bar.statusSlot
+    tooltipText: "Omacom Foundation News Hub\nLatest: " + root.latestTitle + "\nDate: " + root.latestDate + "\nUnread: " + root.unreadCount + "\n\n[Left Click] Open Omacom Dispatches"
     onPressed: function(b) { if (root.opened) root.close(); else root.open(); }
   }
 
