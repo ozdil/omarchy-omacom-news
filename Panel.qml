@@ -82,7 +82,7 @@ Panel {
     id: panel
     anchorItem: button
     owner: root
-    width: Style.space(560)
+    implicitWidth: Style.space(560)
     contentHeight: Math.min(Style.space(680), panel.fittedContentHeight(mainCol.implicitHeight + Style.space(24)))
 
     Flickable {
