@@ -17,9 +17,28 @@ Panel {
 
   property int totalCount: 0
   property int unreadCount: 0
+  property string installedVersion: ""
+  property string latestRelease: ""
+  property bool isSystemUpdated: true
   property string latestTitle: ""
   property string latestDate: ""
   property var articles: []
+  property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
+
+  readonly property var filteredArticles: {
+    if (!root.articles || root.articles.length === 0) return []
+    if (currentCategory === "ALL") return root.articles
+    if (currentCategory === "RELEASE") {
+      return root.articles.filter(function(a) { return a && a.category === "Release" })
+    }
+    if (currentCategory === "FOUNDATION") {
+      return root.articles.filter(function(a) { return a && a.category === "Foundation" })
+    }
+    if (currentCategory === "NEWS") {
+      return root.articles.filter(function(a) { return a && a.category !== "Release" })
+    }
+    return root.articles
+  }
 
   function resolveEnginePath() {
     return Qt.resolvedUrl("omacomnews-engine").toString().replace(/^file:\/\//, "")
@@ -49,10 +68,13 @@ Panel {
       waitForEnd: true
       onStreamFinished: {
         try {
-          var raw = String(text || "").slice(0, 65536)
+          var raw = String(text || "").slice(0, 1048576)
           var data = JSON.parse(raw)
           root.totalCount = data.total || 0
           root.unreadCount = data.unread || 0
+          root.installedVersion = data.installed_version || ""
+          root.latestRelease = data.latest_release || ""
+          root.isSystemUpdated = data.is_system_updated !== undefined ? data.is_system_updated : true
           root.latestTitle = data.latest_title || ""
           root.latestDate = data.latest_date || ""
           root.articles = data.articles || []
@@ -92,7 +114,10 @@ Panel {
     bar: root.bar
     text: ""
     foreground: root.unreadCount > 0 ? "#22c55e" : (root.bar ? root.bar.foreground : Color.foreground)
-    tooltipText: "Omacom News Hub" + (root.unreadCount > 0 ? ("\n" + root.unreadCount + " unread dispatch" + (root.unreadCount > 1 ? "es" : "")) : "\nAll dispatches read")
+    tooltipText: "OmaNews Hub\n" +
+                 (root.installedVersion ? ("Omarchy: " + root.installedVersion + (root.isSystemUpdated ? " (Güncel)\n" : " (Güncelleme var)\n")) : "") +
+                 (root.latestRelease ? ("Son Dağıtım: " + root.latestRelease + "\n") : "") +
+                 (root.unreadCount > 0 ? (root.unreadCount + " yeni bülten / güncelleme") : "Tüm haberler okundu")
     onPressed: function(b) {
       root.toggle()
     }
@@ -104,8 +129,8 @@ Panel {
     owner: root
     bar: root.bar
     open: root.opened
-    contentWidth: panel.fittedContentWidth(Style.space(420))
-    contentHeight: panel.fittedContentHeight(panelColumn.implicitHeight, Style.space(560))
+    contentWidth: panel.fittedContentWidth(Style.space(480))
+    contentHeight: panel.fittedContentHeight(panelColumn.implicitHeight, Style.space(620))
 
     ScrollView {
       id: scrollArea
@@ -117,7 +142,7 @@ Panel {
       Column {
         id: panelColumn
         width: scrollArea.availableWidth
-        spacing: Style.space(14)
+        spacing: Style.space(12)
 
         // ---------- Hero: Newspaper icon · title/status ----------
         Item {
@@ -143,20 +168,45 @@ Panel {
             anchors.verticalCenter: parent.verticalCenter
             spacing: Style.space(2)
 
-            Text {
-              text: "Omacom News"
-              color: root.bar ? root.bar.foreground : Color.foreground
-              font.family: root.bar ? root.bar.fontFamily : Style.font.family
-              font.pixelSize: Style.font.title
-              font.bold: true
-              elide: Text.ElideRight
+            RowLayout {
               width: parent.width
+              spacing: Style.space(8)
+
+              Text {
+                textFormat: Text.PlainText
+                text: "OmaNews"
+                color: root.bar ? root.bar.foreground : Color.foreground
+                font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                font.pixelSize: Style.font.title
+                font.bold: true
+              }
+
+              Item { Layout.fillWidth: true }
+
+              // System Version Badge
+              Rectangle {
+                implicitWidth: verText.implicitWidth + Style.space(12)
+                implicitHeight: verText.implicitHeight + Style.space(4)
+                radius: Style.space(4)
+                color: root.isSystemUpdated ? "#15803d" : "#b45309"
+
+                Text {
+                  id: verText
+                  anchors.centerIn: parent
+                  textFormat: Text.PlainText
+                  text: (root.installedVersion ? ("Omarchy " + root.installedVersion) : "Omarchy") + (root.isSystemUpdated ? " • Güncel" : " • Yeni Sürüm!")
+                  color: "#ffffff"
+                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.pixelSize: Style.font.caption
+                  font.bold: true
+                }
+              }
             }
 
             Text {
               textFormat: Text.PlainText
-              text: (root.unreadCount > 0 ? (root.unreadCount + " UNREAD DISPATCHES") : "ALL DISPATCHES READ").toUpperCase()
-              color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+              text: (root.unreadCount > 0 ? (root.unreadCount + " YENİ HABER & GÜNCELLEME") : "TÜM HABERLER VE SÜRÜMLER GÜNCEL").toUpperCase()
+              color: root.unreadCount > 0 ? "#22c55e" : Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
               font.family: root.bar ? root.bar.fontFamily : Style.font.family
               font.pixelSize: Style.font.caption
               font.bold: true
@@ -165,78 +215,161 @@ Panel {
           }
         }
 
-        // ---------- Latest Dispatches Section ----------
+        // ---------- Filter Tabs Section ----------
+        RowLayout {
+          width: parent.width
+          spacing: Style.space(6)
+
+          Repeater {
+            model: [
+              { id: "ALL", label: "Tümü (" + root.totalCount + ")" },
+              { id: "NEWS", label: "Haberler" },
+              { id: "RELEASE", label: "Sürümler" },
+              { id: "FOUNDATION", label: "Vakıf" }
+            ]
+            delegate: Rectangle {
+              Layout.fillWidth: true
+              implicitHeight: Style.space(28)
+              radius: Style.space(4)
+              color: root.currentCategory === modelData.id
+                     ? (root.bar ? root.bar.foreground : Color.foreground)
+                     : Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
+
+              Text {
+                anchors.centerIn: parent
+                textFormat: Text.PlainText
+                text: modelData.label
+                color: root.currentCategory === modelData.id
+                       ? (root.bar ? root.bar.background : Color.background)
+                       : (root.bar ? root.bar.foreground : Color.foreground)
+                font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                font.pixelSize: Style.font.caption
+                font.bold: root.currentCategory === modelData.id
+              }
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                  root.currentCategory = modelData.id
+                }
+              }
+            }
+          }
+        }
+
         PanelSeparator {
           foreground: root.bar ? root.bar.foreground : Color.foreground
         }
 
+        // ---------- Articles & Releases Feed List ----------
         Column {
           width: parent.width
           spacing: Style.space(6)
 
-          PanelSectionHeader {
-            text: "FOUNDATION DISPATCHES"
-            foreground: root.bar ? root.bar.foreground : Color.foreground
-            fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
-          }
+          Repeater {
+            model: root.filteredArticles ? root.filteredArticles.slice(0, 8) : []
+            delegate: Rectangle {
+              width: parent.width
+              implicitHeight: artLayout.implicitHeight + Style.space(16)
+              radius: Style.space(6)
+              color: Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
 
-          Column {
-            width: parent.width
-            spacing: Style.space(6)
+              readonly property var artData: modelData
 
-            Repeater {
-              model: root.articles ? root.articles.slice(0, 6) : []
-              delegate: Rectangle {
-                width: parent.width
-                height: Style.space(52)
-                radius: Style.space(4)
-                color: Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
+              function categoryColor(cat) {
+                if (cat === "Release") return "#16a34a"
+                if (cat === "Foundation") return "#d97706"
+                if (cat === "Distro") return "#2563eb"
+                if (cat === "Community") return "#7c3aed"
+                if (cat === "Ecosystem") return "#db2777"
+                return "#475569"
+              }
 
-                readonly property var artData: modelData
+              ColumnLayout {
+                id: artLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Style.space(10)
+                spacing: Style.space(4)
 
-                ColumnLayout {
-                  anchors.fill: parent
-                  anchors.margins: Style.space(8)
-                  spacing: Style.space(2)
+                // Top: Category Badge, Read status & Date
+                RowLayout {
+                  Layout.fillWidth: true
+                  spacing: Style.space(6)
 
-                  Text {
-                    Layout.fillWidth: true
-                    textFormat: Text.PlainText
-                    text: artData ? String(artData.title) : ""
-                    color: root.bar ? root.bar.foreground : Color.foreground
-                    font.family: root.bar ? root.bar.fontFamily : Style.font.family
-                    font.pixelSize: Style.font.bodySmall
-                    font.bold: artData ? !artData.is_read : false
-                    elide: Text.ElideRight
-                  }
+                  Rectangle {
+                    implicitWidth: catLabel.implicitWidth + Style.space(10)
+                    implicitHeight: catLabel.implicitHeight + Style.space(2)
+                    radius: Style.space(3)
+                    color: categoryColor(artData ? artData.category : "")
 
-                  RowLayout {
-                    Layout.fillWidth: true
                     Text {
+                      id: catLabel
+                      anchors.centerIn: parent
                       textFormat: Text.PlainText
-                      text: artData ? (String(artData.date) + " • " + String(artData.author)) : ""
-                      color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+                      text: (artData ? artData.category : "").toUpperCase()
+                      color: "#ffffff"
                       font.family: root.bar ? root.bar.fontFamily : Style.font.family
-                      font.pixelSize: Style.font.caption
-                    }
-                    Item { Layout.fillWidth: true }
-                    Text {
-                      textFormat: Text.PlainText
-                      text: artData && artData.is_read ? "READ" : "NEW"
-                      color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.6) : (root.bar ? root.bar.foreground : Color.foreground)
-                      font.family: root.bar ? root.bar.fontFamily : Style.font.family
-                      font.pixelSize: Style.font.caption
+                      font.pixelSize: Style.font.tiny || 9
                       font.bold: true
                     }
                   }
+
+                  Text {
+                    textFormat: Text.PlainText
+                    text: artData ? (artData.date + " • " + artData.author) : ""
+                    color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+                    font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                    font.pixelSize: Style.font.caption
+                  }
+
+                  Item { Layout.fillWidth: true }
+
+                  Text {
+                    textFormat: Text.PlainText
+                    text: artData && artData.is_read ? "OKUNDU" : "YENİ"
+                    color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.8) : "#22c55e"
+                    font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                    font.pixelSize: Style.font.caption
+                    font.bold: true
+                  }
                 }
 
-                MouseArea {
-                  anchors.fill: parent
-                  cursorShape: Qt.PointingHandCursor
-                  onClicked: {
-                    if (artData && artData.url) root.sendCmd("--read", artData.url)
-                  }
+                // Title
+                Text {
+                  Layout.fillWidth: true
+                  textFormat: Text.PlainText
+                  text: artData ? String(artData.title) : ""
+                  color: root.bar ? root.bar.foreground : Color.foreground
+                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.pixelSize: Style.font.bodySmall
+                  font.bold: artData ? !artData.is_read : false
+                  wrapMode: Text.Wrap
+                  maximumLineCount: 2
+                  elide: Text.ElideRight
+                }
+
+                // Excerpt snippet
+                Text {
+                  Layout.fillWidth: true
+                  textFormat: Text.PlainText
+                  text: artData ? String(artData.excerpt) : ""
+                  color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.3)
+                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.pixelSize: Style.font.caption
+                  wrapMode: Text.Wrap
+                  maximumLineCount: 2
+                  elide: Text.ElideRight
+                }
+              }
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                  if (artData && artData.url) root.sendCmd("--read", artData.url)
                 }
               }
             }
@@ -252,28 +385,28 @@ Panel {
           width: parent.width
           spacing: Style.space(6)
 
-          PanelSectionHeader {
-            text: "ACTIONS"
-            foreground: root.bar ? root.bar.foreground : Color.foreground
-            fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
-          }
-
           RowLayout {
             width: parent.width
             spacing: Style.space(8)
 
             Button {
               Layout.fillWidth: true
-              text: "Mark All Read"
+              text: "Tümünü Okundu Say"
               onClicked: root.sendCmd("--mark-read")
             }
 
             Button {
               Layout.fillWidth: true
-              text: "Refresh"
+              text: "Yenile"
               onClicked: {
                 if (!engineProc.running) engineProc.running = true
               }
+            }
+
+            Button {
+              Layout.fillWidth: true
+              text: "omarchy.org"
+              onClicked: root.sendCmd("--read", "https://omarchy.org/news")
             }
           }
         }

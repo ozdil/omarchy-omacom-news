@@ -1,8 +1,8 @@
 # Maintainer: Ozan Özdil <ozan@pm.me>
 pkgname=omarchy-omacom-news
-pkgver=1.1.0
+pkgver=1.2.0
 pkgrel=1
-pkgdesc="Official Omacom Foundation news dispatches and notification engine for Omarchy Linux"
+pkgdesc="Official Omarchy Linux news dispatches, distro releases, and desktop notification engine"
 arch=('x86_64')
 url="https://github.com/ozdil/omarchy-omacom-news"
 license=('MIT')

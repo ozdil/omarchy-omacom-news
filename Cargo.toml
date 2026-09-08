@@ -1,9 +1,9 @@
 [package]
 name = "omacomnews-engine"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 authors = ["Ozan Özdil <ozan@pm.me>"]
-description = "Omacom Foundation news and notifications engine for Omarchy Linux"
+description = "Omarchy Linux news, distro releases, and desktop notification engine"
 license = "MIT"
 
 [dependencies]
