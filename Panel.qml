@@ -113,7 +113,7 @@ Panel {
     anchors.fill: parent
     bar: root.bar
     text: ""
-    foreground: root.unreadCount > 0 ? "#22c55e" : (root.bar ? root.bar.foreground : Color.foreground)
+    foreground: root.bar ? root.bar.foreground : Color.foreground
     tooltipText: "OmaNews Hub\n" +
                  (root.installedVersion ? ("Omarchy: " + root.installedVersion + (root.isSystemUpdated ? " (Up to date)\n" : " (Update available)\n")) : "") +
                  (root.latestRelease ? ("Latest Release: " + root.latestRelease + "\n") : "") +
@@ -186,16 +186,18 @@ Panel {
               // System Version Badge
               Rectangle {
                 implicitWidth: verText.implicitWidth + Style.space(12)
-                implicitHeight: verText.implicitHeight + Style.space(4)
-                radius: Style.space(4)
-                color: root.isSystemUpdated ? "#15803d" : "#b45309"
+                implicitHeight: verText.implicitHeight + Style.space(6)
+                radius: Style.cornerRadius
+                color: Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
+                border.color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+                border.width: 1
 
                 Text {
                   id: verText
                   anchors.centerIn: parent
                   textFormat: Text.PlainText
                   text: (root.installedVersion ? ("Omarchy " + root.installedVersion) : "Omarchy") + (root.isSystemUpdated ? " • Up to date" : " • Update Available!")
-                  color: "#ffffff"
+                  color: root.bar ? root.bar.foreground : Color.foreground
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.caption
                   font.bold: true
@@ -206,7 +208,7 @@ Panel {
             Text {
               textFormat: Text.PlainText
               text: (root.unreadCount > 0 ? (root.unreadCount + " NEW DISPATCHES & UPDATES") : "ALL DISPATCHES & RELEASES UP TO DATE").toUpperCase()
-              color: root.unreadCount > 0 ? "#22c55e" : Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+              color: root.unreadCount > 0 ? (root.bar ? root.bar.foreground : Color.foreground) : Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
               font.family: root.bar ? root.bar.fontFamily : Style.font.family
               font.pixelSize: Style.font.caption
               font.bold: true
@@ -227,33 +229,18 @@ Panel {
               { id: "RELEASE", label: "Releases" },
               { id: "FOUNDATION", label: "Foundation" }
             ]
-            delegate: Rectangle {
+            delegate: Button {
               Layout.fillWidth: true
-              implicitHeight: Style.space(28)
-              radius: Style.space(4)
-              color: root.currentCategory === modelData.id
-                     ? (root.bar ? root.bar.foreground : Color.foreground)
-                     : Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
-
-              Text {
-                anchors.centerIn: parent
-                textFormat: Text.PlainText
-                text: modelData.label
-                color: root.currentCategory === modelData.id
-                       ? (root.bar ? root.bar.background : Color.background)
-                       : (root.bar ? root.bar.foreground : Color.foreground)
-                font.family: root.bar ? root.bar.fontFamily : Style.font.family
-                font.pixelSize: Style.font.caption
-                font.bold: root.currentCategory === modelData.id
-              }
-
-              MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                  root.currentCategory = modelData.id
-                }
-              }
+              text: modelData.label
+              selected: root.currentCategory === modelData.id
+              bordered: true
+              foreground: root.bar ? root.bar.foreground : Color.foreground
+              accent: Color.accent
+              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontSize: Style.font.caption
+              horizontalPadding: Style.space(8)
+              verticalPadding: Style.space(5)
+              onClicked: root.currentCategory = modelData.id
             }
           }
         }
@@ -272,19 +259,17 @@ Panel {
             delegate: Rectangle {
               width: parent.width
               implicitHeight: artLayout.implicitHeight + Style.space(16)
-              radius: Style.space(6)
+              radius: Style.cornerRadius
               color: Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
+              border.color: Qt.rgba(
+                (root.bar ? root.bar.foreground : Color.foreground).r,
+                (root.bar ? root.bar.foreground : Color.foreground).g,
+                (root.bar ? root.bar.foreground : Color.foreground).b,
+                0.12
+              )
+              border.width: 1
 
               readonly property var artData: modelData
-
-              function categoryColor(cat) {
-                if (cat === "Release") return "#16a34a"
-                if (cat === "Foundation") return "#d97706"
-                if (cat === "Distro") return "#2563eb"
-                if (cat === "Community") return "#7c3aed"
-                if (cat === "Ecosystem") return "#db2777"
-                return "#475569"
-              }
 
               ColumnLayout {
                 id: artLayout
@@ -301,16 +286,18 @@ Panel {
 
                   Rectangle {
                     implicitWidth: catLabel.implicitWidth + Style.space(10)
-                    implicitHeight: catLabel.implicitHeight + Style.space(2)
-                    radius: Style.space(3)
-                    color: categoryColor(artData ? artData.category : "")
+                    implicitHeight: catLabel.implicitHeight + Style.space(4)
+                    radius: Style.cornerRadius
+                    color: "transparent"
+                    border.color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+                    border.width: 1
 
                     Text {
                       id: catLabel
                       anchors.centerIn: parent
                       textFormat: Text.PlainText
                       text: (artData ? artData.category : "").toUpperCase()
-                      color: "#ffffff"
+                      color: root.bar ? root.bar.foreground : Color.foreground
                       font.family: root.bar ? root.bar.fontFamily : Style.font.family
                       font.pixelSize: Style.font.tiny || 9
                       font.bold: true
@@ -329,8 +316,8 @@ Panel {
 
                   Text {
                     textFormat: Text.PlainText
-                    text: artData && artData.is_read ? "READ" : "NEW"
-                    color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.8) : "#22c55e"
+                    text: artData && artData.is_read ? "READ" : "● NEW"
+                    color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.8) : (root.bar ? root.bar.foreground : Color.foreground)
                     font.family: root.bar ? root.bar.fontFamily : Style.font.family
                     font.pixelSize: Style.font.caption
                     font.bold: true
