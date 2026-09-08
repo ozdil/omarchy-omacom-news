@@ -369,7 +369,10 @@ Panel {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                  if (artData && artData.url) root.sendCmd("--read", artData.url)
+                  if (artData && artData.url) {
+                    Qt.openUrlExternally(artData.url)
+                    if (artData.id) root.sendCmd("--mark-read-single", artData.id)
+                  }
                 }
               }
             }
@@ -406,7 +409,7 @@ Panel {
             Button {
               Layout.fillWidth: true
               text: "omarchy.org"
-              onClicked: root.sendCmd("--read", "https://omarchy.org/news")
+              onClicked: Qt.openUrlExternally("https://omarchy.org/news")
             }
           }
         }

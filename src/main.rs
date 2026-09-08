@@ -215,8 +215,23 @@ fn main() {
         if let Some(idx) = args.iter().position(|a| a == "--read") {
             if idx + 1 < args.len() {
                 let target_url = &args[idx + 1];
-                let deadline = Instant::now() + Duration::from_millis(500);
-                let _ = run_cmd_bounded("/usr/bin/xdg-open", &[target_url], &[], deadline, 1024);
+                let _ = std::process::Command::new("/usr/bin/xdg-open")
+                    .arg(target_url)
+                    .spawn();
+            }
+        }
+        return;
+    }
+
+    if args.iter().any(|a| a == "--mark-read-single") {
+        if let Some(idx) = args.iter().position(|a| a == "--mark-read-single") {
+            if idx + 1 < args.len() {
+                let target_id = &args[idx + 1];
+                let mut state = load_state();
+                if !state.read_ids.contains(target_id) {
+                    state.read_ids.push(target_id.clone());
+                    let _ = save_state(&state);
+                }
             }
         }
         return;
