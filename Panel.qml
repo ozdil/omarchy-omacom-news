@@ -115,9 +115,9 @@ Panel {
     text: ""
     foreground: root.unreadCount > 0 ? "#22c55e" : (root.bar ? root.bar.foreground : Color.foreground)
     tooltipText: "OmaNews Hub\n" +
-                 (root.installedVersion ? ("Omarchy: " + root.installedVersion + (root.isSystemUpdated ? " (Güncel)\n" : " (Güncelleme var)\n")) : "") +
-                 (root.latestRelease ? ("Son Dağıtım: " + root.latestRelease + "\n") : "") +
-                 (root.unreadCount > 0 ? (root.unreadCount + " yeni bülten / güncelleme") : "Tüm haberler okundu")
+                 (root.installedVersion ? ("Omarchy: " + root.installedVersion + (root.isSystemUpdated ? " (Up to date)\n" : " (Update available)\n")) : "") +
+                 (root.latestRelease ? ("Latest Release: " + root.latestRelease + "\n") : "") +
+                 (root.unreadCount > 0 ? (root.unreadCount + " unread dispatch" + (root.unreadCount > 1 ? "es" : "") + " / updates") : "All dispatches read")
     onPressed: function(b) {
       root.toggle()
     }
@@ -194,7 +194,7 @@ Panel {
                   id: verText
                   anchors.centerIn: parent
                   textFormat: Text.PlainText
-                  text: (root.installedVersion ? ("Omarchy " + root.installedVersion) : "Omarchy") + (root.isSystemUpdated ? " • Güncel" : " • Yeni Sürüm!")
+                  text: (root.installedVersion ? ("Omarchy " + root.installedVersion) : "Omarchy") + (root.isSystemUpdated ? " • Up to date" : " • Update Available!")
                   color: "#ffffff"
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.caption
@@ -205,7 +205,7 @@ Panel {
 
             Text {
               textFormat: Text.PlainText
-              text: (root.unreadCount > 0 ? (root.unreadCount + " YENİ HABER & GÜNCELLEME") : "TÜM HABERLER VE SÜRÜMLER GÜNCEL").toUpperCase()
+              text: (root.unreadCount > 0 ? (root.unreadCount + " NEW DISPATCHES & UPDATES") : "ALL DISPATCHES & RELEASES UP TO DATE").toUpperCase()
               color: root.unreadCount > 0 ? "#22c55e" : Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
               font.family: root.bar ? root.bar.fontFamily : Style.font.family
               font.pixelSize: Style.font.caption
@@ -222,10 +222,10 @@ Panel {
 
           Repeater {
             model: [
-              { id: "ALL", label: "Tümü (" + root.totalCount + ")" },
-              { id: "NEWS", label: "Haberler" },
-              { id: "RELEASE", label: "Sürümler" },
-              { id: "FOUNDATION", label: "Vakıf" }
+              { id: "ALL", label: "All (" + root.totalCount + ")" },
+              { id: "NEWS", label: "News" },
+              { id: "RELEASE", label: "Releases" },
+              { id: "FOUNDATION", label: "Foundation" }
             ]
             delegate: Rectangle {
               Layout.fillWidth: true
@@ -329,7 +329,7 @@ Panel {
 
                   Text {
                     textFormat: Text.PlainText
-                    text: artData && artData.is_read ? "OKUNDU" : "YENİ"
+                    text: artData && artData.is_read ? "READ" : "NEW"
                     color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.8) : "#22c55e"
                     font.family: root.bar ? root.bar.fontFamily : Style.font.family
                     font.pixelSize: Style.font.caption
@@ -394,13 +394,13 @@ Panel {
 
             Button {
               Layout.fillWidth: true
-              text: "Tümünü Okundu Say"
+              text: "Mark All Read"
               onClicked: root.sendCmd("--mark-read")
             }
 
             Button {
               Layout.fillWidth: true
-              text: "Yenile"
+              text: "Refresh"
               onClicked: {
                 if (!engineProc.running) engineProc.running = true
               }

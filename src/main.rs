@@ -143,12 +143,12 @@ pub fn get_all_articles() -> (Vec<Article>, String, String, bool) {
 
 pub fn send_desktop_notification(article: &Article) {
     let prefix = match article.category.as_str() {
-        "Release" => "OMARCHY SÜRÜM GÜNCELLEMESİ",
-        "Foundation" => "OMACOM VAKFI DUYURUSU",
-        "Distro" => "OMARCHY SİSTEM DUYURUSU",
-        "Community" => "OMARCHY TOPLULUK",
-        "Ecosystem" => "OMARCHY EKOSİSTEM",
-        _ => "OMANEWS HABER",
+        "Release" => "OMARCHY RELEASE UPDATE",
+        "Foundation" => "OMACOM FOUNDATION DISPATCH",
+        "Distro" => "OMARCHY DISTRO ANNOUNCEMENT",
+        "Community" => "OMARCHY COMMUNITY",
+        "Ecosystem" => "OMARCHY ECOSYSTEM",
+        _ => "OMANEWS DISPATCH",
     };
 
     let summary = format!("{}: {}", prefix, article.title);
@@ -262,7 +262,7 @@ fn main() {
         };
 
         let tooltip = format!(
-            "OmaNews Hub\nOmarchy Sürümü: {}\nSon Sürüm: {}\nSon Haber: {}\nTarih: {}\nOkunmamış: {}\nMotor: Güvenli Native Rust",
+            "OmaNews Hub\nOmarchy Version: {}\nLatest Release: {}\nLatest Dispatch: {}\nDate: {}\nUnread: {}\nEngine: Native Rust",
             installed_version, latest_release, latest_title, latest_date, unread
         );
 
@@ -295,13 +295,13 @@ fn main() {
     println!("==========================================================================================");
     println!("                                   OMANEWS DESKTOP HUB                                   ");
     println!("==========================================================================================");
-    println!("Omarchy Kurulu: {} | Son Dağıtım Sürümü: {} (Güncel: {})", installed_version, latest_release, is_system_updated);
-    println!("Toplam Haber/Sürüm: {} | Okunmamış: {}", total, unread);
+    println!("Omarchy Installed: {} | Latest Distro Release: {} (Up to date: {})", installed_version, latest_release, is_system_updated);
+    println!("Total Dispatches & Releases: {} | Unread: {}", total, unread);
     println!("------------------------------------------------------------------------------------------");
-    println!("{:<12} {:<12} {:<54} {:<8}", "TARİH", "KATEGORİ", "BAŞLIK", "DURUM");
+    println!("{:<12} {:<12} {:<54} {:<8}", "DATE", "CATEGORY", "TITLE", "STATUS");
     println!("------------------------------------------------------------------------------------------");
     for a in &articles {
-        let mark = if a.is_read { "OKUNDU" } else { "YENİ" };
+        let mark = if a.is_read { "READ" } else { "NEW" };
         let short_title = if a.title.len() > 52 {
             format!("{}...", &a.title[..49])
         } else {
