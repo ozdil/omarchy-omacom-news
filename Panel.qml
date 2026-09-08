@@ -91,7 +91,8 @@ Panel {
     anchors.fill: parent
     bar: root.bar
     text: ""
-    tooltipText: "Omacom News Hub"
+    foreground: root.unreadCount > 0 ? "#22c55e" : (root.bar ? root.bar.foreground : Color.foreground)
+    tooltipText: "Omacom News Hub" + (root.unreadCount > 0 ? ("\n" + root.unreadCount + " unread dispatch" + (root.unreadCount > 1 ? "es" : "")) : "\nAll dispatches read")
     onPressed: function(b) {
       root.toggle()
     }
