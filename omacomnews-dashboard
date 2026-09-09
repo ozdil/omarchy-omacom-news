@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# Prefer native Quickshell UI if available
+if [[ "${1:-}" != "--cli" ]] && command -v quickshell >/dev/null 2>&1; then
+    if quickshell ipc -p /usr/share/omarchy/shell call ozdil.omacom-news toggle >/dev/null 2>&1; then
+        exit 0
+    fi
+fi
+
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ ! -x "$DIR/omacomnews-engine" ]]; then
   (cd "$DIR" && cargo build --release --locked && cp target/release/omacomnews-engine "$DIR/omacomnews-engine") || exit 1
