@@ -1,5 +1,7 @@
 # OmaNews - Official Omarchy Linux News and Release Hub
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support_Development-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/ozdil)
+
 Official Omarchy Linux news dispatches, distribution releases, and desktop notification hub for Omarchy Linux.
 
 Author: Ozan Ozdil (ozdil)  
@@ -84,6 +86,14 @@ OmaNews complies strictly with the Omarchy Linux Security Standards (AGENTS.md):
 - Memory Limits: Bounded buffers prevent memory overruns during feed parsing.
 - State File Hardening: Atomic file operations are written with POSIX mode 0600 permissions. State directories use mode 0700. Symlinks are rejected.
 - Plain Text UI: All dynamic text rendered in QML components utilizes `textFormat: Text.PlainText` to prevent script and markup injection.
+
+---
+
+## Support & Sponsorship
+
+If you find OmaNews useful and want to support independent Linux development:
+
+<a href="https://buymeacoffee.com/ozdil" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;" ></a>
 
 ---
 

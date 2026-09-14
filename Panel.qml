@@ -183,6 +183,16 @@ Panel {
 
               Item { Layout.fillWidth: true }
 
+              Button {
+                text: "☕"
+                tooltipText: "Buy Me a Coffee"
+                foreground: "#FFDD00"
+                fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+                fontSize: Style.font.caption
+                bordered: true
+                onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
+              }
+
               // System Version Badge
               Rectangle {
                 implicitWidth: verText.implicitWidth + Style.space(12)
