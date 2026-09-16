@@ -24,6 +24,7 @@ Panel {
   property string latestDate: ""
   property var articles: []
   property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
+  readonly property string fontFamily: (root.bar && root.bar.fontFamily) ? root.bar.fontFamily : ((typeof Style !== "undefined" && Style.font && Style.font.family) ? Style.font.family : "JetBrainsMono Nerd Font")
 
   readonly property var filteredArticles: {
     if (!root.articles || root.articles.length === 0) return []
@@ -154,7 +155,7 @@ Panel {
             textFormat: Text.PlainText
             text: ""
             color: root.bar ? root.bar.foreground : Color.foreground
-            font.family: root.bar ? root.bar.fontFamily : Style.font.family
+            font.family: root.fontFamily
             font.pixelSize: Style.font.display
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -176,7 +177,7 @@ Panel {
                 textFormat: Text.PlainText
                 text: "OmaNews"
                 color: root.bar ? root.bar.foreground : Color.foreground
-                font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                font.family: root.fontFamily
                 font.pixelSize: Style.font.title
                 font.bold: true
               }
@@ -187,7 +188,7 @@ Panel {
                 text: "☕"
                 tooltipText: "Buy Me a Coffee"
                 foreground: "#FFDD00"
-                fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+                fontFamily: root.fontFamily
                 fontSize: Style.font.caption
                 bordered: true
                 onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
@@ -208,7 +209,7 @@ Panel {
                   textFormat: Text.PlainText
                   text: (root.installedVersion ? ("Omarchy " + root.installedVersion) : "Omarchy") + (root.isSystemUpdated ? " • Up to date" : " • Update Available!")
                   color: root.bar ? root.bar.foreground : Color.foreground
-                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
                   font.bold: true
                 }
@@ -219,7 +220,7 @@ Panel {
               textFormat: Text.PlainText
               text: (root.unreadCount > 0 ? (root.unreadCount + " NEW DISPATCHES & UPDATES") : "ALL DISPATCHES & RELEASES UP TO DATE").toUpperCase()
               color: root.unreadCount > 0 ? (root.bar ? root.bar.foreground : Color.foreground) : Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
-              font.family: root.bar ? root.bar.fontFamily : Style.font.family
+              font.family: root.fontFamily
               font.pixelSize: Style.font.caption
               font.bold: true
               font.letterSpacing: 1.2
@@ -246,7 +247,7 @@ Panel {
               bordered: true
               foreground: root.bar ? root.bar.foreground : Color.foreground
               accent: Color.accent
-              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontFamily: root.fontFamily
               fontSize: Style.font.caption
               horizontalPadding: Style.space(8)
               verticalPadding: Style.space(5)
@@ -308,7 +309,7 @@ Panel {
                       textFormat: Text.PlainText
                       text: (artData ? artData.category : "").toUpperCase()
                       color: root.bar ? root.bar.foreground : Color.foreground
-                      font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                      font.family: root.fontFamily
                       font.pixelSize: Style.font.tiny || 9
                       font.bold: true
                     }
@@ -318,7 +319,7 @@ Panel {
                     textFormat: Text.PlainText
                     text: artData ? (artData.date + " • " + artData.author) : ""
                     color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
-                    font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                    font.family: root.fontFamily
                     font.pixelSize: Style.font.caption
                   }
 
@@ -328,7 +329,7 @@ Panel {
                     textFormat: Text.PlainText
                     text: artData && artData.is_read ? "READ" : "● NEW"
                     color: artData && artData.is_read ? Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.8) : (root.bar ? root.bar.foreground : Color.foreground)
-                    font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                    font.family: root.fontFamily
                     font.pixelSize: Style.font.caption
                     font.bold: true
                   }
@@ -340,7 +341,7 @@ Panel {
                   textFormat: Text.PlainText
                   text: artData ? String(artData.title) : ""
                   color: root.bar ? root.bar.foreground : Color.foreground
-                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.family: root.fontFamily
                   font.pixelSize: Style.font.bodySmall
                   font.bold: artData ? !artData.is_read : false
                   wrapMode: Text.Wrap
@@ -354,7 +355,7 @@ Panel {
                   textFormat: Text.PlainText
                   text: artData ? String(artData.excerpt) : ""
                   color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.3)
-                  font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                  font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
                   wrapMode: Text.Wrap
                   maximumLineCount: 2
