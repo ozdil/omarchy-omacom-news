@@ -24,7 +24,7 @@ Panel {
   property string latestDate: ""
   property var articles: []
   property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
-  readonly property string fontFamily: (root.bar && root.bar.fontFamily) ? root.bar.fontFamily : ((typeof Style !== "undefined" && Style.font && Style.font.family) ? Style.font.family : "JetBrainsMono Nerd Font")
+  readonly property string fontFamily: (root.bar && root.bar.fontFamily) ? root.bar.fontFamily : ((typeof Style !== "undefined" && Style.font && Style.font.family) ? Style.font.family : "JetBrainsMono Nerd Font, JetBrains Mono, monospace")
 
   readonly property var filteredArticles: {
     if (!root.articles || root.articles.length === 0) return []
