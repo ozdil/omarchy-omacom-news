@@ -6,7 +6,9 @@
   "author": "Ozan Özdil (ozdil)",
   "license": "MIT",
   "description": "Official Omarchy news dispatches, distro releases, and desktop announcements.",
-  "kinds": ["bar-widget"],
+  "kinds": [
+    "bar-widget"
+  ],
   "activation": "on-demand",
   "entryPoints": {
     "barWidget": "Panel.qml"
@@ -16,7 +18,15 @@
     "description": "Omarchy news dispatches, distro releases, and desktop notification center.",
     "category": "System",
     "defaultSection": "right",
-    "aliases": ["omanews", "news", "omacom", "foundation", "announcements", "omacom-news"],
+    "aliases": [
+      "omanews",
+      "news",
+      "omacom",
+      "foundation",
+      "announcements",
+      "omacom-news"
+    ],
     "allowMultiple": false
-  }
+  },
+  "verified": true
 }
