@@ -91,6 +91,11 @@ Panel {
     }
   }
 
+  Process {
+    id: openWindowProc
+    command: ["omacomnews-dashboard"]
+  }
+
   Timer {
     interval: 30000
     running: true
@@ -185,9 +190,25 @@ Panel {
               Item { Layout.fillWidth: true }
 
               Button {
-                text: "☕"
-                tooltipText: "Buy Me a Coffee"
-                foreground: "#FFDD00"
+                text: "Window"
+                iconText: "\uf2d0"
+                tooltipText: "Open Standalone News Window"
+                foreground: root.bar ? root.bar.foreground : Color.foreground
+                accent: Color.accent
+                fontFamily: root.fontFamily
+                fontSize: Style.font.caption
+                bordered: true
+                onClicked: {
+                  root.close()
+                  openWindowProc.running = true
+                }
+              }
+
+              Button {
+                text: "Donate"
+                iconText: "\uf0f4"
+                tooltipText: "Support Omarchy Project"
+                foreground: root.bar ? root.bar.foreground : Color.foreground
                 fontFamily: root.fontFamily
                 fontSize: Style.font.caption
                 bordered: true

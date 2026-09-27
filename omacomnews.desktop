@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=OmaNews
+GenericName=Community News & Releases
+Comment=Omarchy community dispatches, releases and ecosystem news hub
+Exec=omacomnews-dashboard
+Icon=news
+Terminal=false
+Categories=Network;News;Feed;
+Keywords=news;releases;omarchy;dispatches;rss;
