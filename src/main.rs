@@ -245,6 +245,41 @@ fn main() {
         return;
     }
 
+    if args.iter().any(|a| a == "--copy-url") {
+        if let Some(idx) = args.iter().position(|a| a == "--copy-url") {
+            if idx + 1 < args.len() {
+                let url = &args[idx + 1];
+                let mut copied = false;
+                if let Ok(mut child) = std::process::Command::new("wl-copy")
+                    .stdin(std::process::Stdio::piped())
+                    .spawn()
+                {
+                    use std::io::Write;
+                    if let Some(mut stdin) = child.stdin.take() {
+                        let _ = stdin.write_all(url.as_bytes());
+                    }
+                    let _ = child.wait();
+                    copied = true;
+                }
+                if !copied {
+                    if let Ok(mut child) = std::process::Command::new("xclip")
+                        .args(&["-selection", "clipboard"])
+                        .stdin(std::process::Stdio::piped())
+                        .spawn()
+                    {
+                        use std::io::Write;
+                        if let Some(mut stdin) = child.stdin.take() {
+                            let _ = stdin.write_all(url.as_bytes());
+                        }
+                        let _ = child.wait();
+                    }
+                }
+                println!("Dispatched URL to clipboard: {}", url);
+            }
+        }
+        return;
+    }
+
     if args.iter().any(|a| a == "--mark-read-single") {
         if let Some(idx) = args.iter().position(|a| a == "--mark-read-single") {
             if idx + 1 < args.len() {

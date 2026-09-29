@@ -50,11 +50,30 @@ Panel {
     selectedIndex = next
   }
 
+  property string toastMessage: ""
+  property bool showToast: false
+
+  function triggerToast(msg) {
+    toastMessage = msg
+    showToast = true
+    toastTimer.restart()
+  }
+
+  function copySelectedUrl() {
+    if (!root.filteredArticles || root.filteredArticles.length === 0) return
+    var art = root.filteredArticles[selectedIndex]
+    if (art && art.url) {
+      root.sendCmd("--copy-url", art.url)
+      triggerToast("URL copied to clipboard")
+    }
+  }
+
   function activateSelected() {
     if (!root.filteredArticles || root.filteredArticles.length === 0) return
     var art = root.filteredArticles[selectedIndex]
     if (art && art.url) {
       Qt.openUrlExternally(art.url)
+      if (art.id) root.sendCmd("--mark-read-single", art.id)
     }
   }
 
@@ -135,6 +154,15 @@ Panel {
     }
   }
 
+  Timer {
+    id: toastTimer
+    interval: 2000
+    repeat: false
+    onTriggered: {
+      root.showToast = false
+    }
+  }
+
   Component.onCompleted: {
     if (!engineProc.running) engineProc.running = true
   }
@@ -184,6 +212,8 @@ Panel {
       onTextKey: function(t) {
         if (t === "r" || t === "R") {
           if (!engineProc.running) engineProc.running = true
+        } else if (t === "c" || t === "C") {
+          root.copySelectedUrl()
         } else if (t === "a" || t === "A") {
           root.showAboutModal = !root.showAboutModal
         } else if (t === "1") {
@@ -395,6 +425,22 @@ Panel {
 
                   Item { Layout.fillWidth: true }
 
+                  Button {
+                    implicitWidth: Style.space(22)
+                    implicitHeight: Style.space(18)
+                    text: ""
+                    bordered: false
+                    foreground: root.bar ? root.bar.foreground : Color.foreground
+                    fontFamily: root.fontFamily
+                    fontSize: Style.font.caption
+                    onClicked: {
+                      if (artData && artData.url) {
+                        root.sendCmd("--copy-url", artData.url)
+                        root.triggerToast("URL copied to clipboard")
+                      }
+                    }
+                  }
+
                   Text {
                     textFormat: Text.PlainText
                     text: artData && artData.is_read ? "READ" : "● NEW"
@@ -529,7 +575,7 @@ Panel {
         }
 
         Text {
-          text: "Version: 1.1.0\nDeveloper: Ozan Ozdil (@ozdil)\nLicense: MIT\nOmarchy Community News & System Release Hub"
+          text: "Version: 1.3.0\nDeveloper: Ozan Ozdil (@ozdil)\nLicense: MIT\nOmarchy Community News & System Release Hub"
           color: root.bar ? root.bar.foreground : Color.foreground
           opacity: 0.7
           font.family: root.fontFamily
@@ -565,6 +611,35 @@ Panel {
           fontSize: Style.font.caption
           onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
         }
+      }
+    }
+
+    // ---------- In-Panel Toast Notification ----------
+    Rectangle {
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: Style.space(16)
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: Math.min(parent.width - Style.space(32), toastText.implicitWidth + Style.space(24))
+      implicitHeight: toastText.implicitHeight + Style.space(12)
+      radius: Style.space(6)
+      color: root.bar ? root.bar.foreground : Color.foreground
+      opacity: root.showToast ? 0.95 : 0.0
+      visible: opacity > 0.0
+      z: 100
+
+      Behavior on opacity {
+        NumberAnimation { duration: 150 }
+      }
+
+      Text {
+        id: toastText
+        anchors.centerIn: parent
+        textFormat: Text.PlainText
+        text: root.toastMessage
+        color: root.bar ? root.bar.background : Color.background
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+        font.bold: true
       }
     }
     }
