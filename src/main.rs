@@ -155,11 +155,16 @@ pub fn send_desktop_notification(article: &Article) {
     let body = format!("{} • {}\n{}", article.date, article.author, article.excerpt);
 
     let deadline = Instant::now() + Duration::from_secs(2);
-    let _ = run_cmd_bounded(
-        "/usr/bin/notify-send",
+    let glyph = "󰑚";
+    let status = run_cmd_bounded(
+        "omarchy-notification-send",
         &[
-            "--app-name=OmaNews",
-            "--urgency=normal",
+            "--app-name",
+            "OmaNews",
+            "-g",
+            glyph,
+            "-u",
+            "normal",
             &summary,
             &body,
         ],
@@ -167,6 +172,23 @@ pub fn send_desktop_notification(article: &Article) {
         deadline,
         1024,
     );
+
+    if status.is_none() {
+        let _ = run_cmd_bounded(
+            "/usr/bin/notify-send",
+            &[
+                "--app-name=OmaNews",
+                "-i",
+                "dialog-information",
+                "--urgency=normal",
+                &summary,
+                &body,
+            ],
+            &[],
+            deadline,
+            1024,
+        );
+    }
 }
 
 pub fn check_and_notify_latest(articles: &[Article]) {

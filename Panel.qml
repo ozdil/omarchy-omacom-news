@@ -24,6 +24,40 @@ Panel {
   property string latestDate: ""
   property var articles: []
   property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
+  property bool showAboutModal: false
+  property int selectedIndex: 0
+  property bool cursorActive: false
+
+  onOpenedChanged: {
+    if (root.opened) {
+      selectedIndex = 0
+      cursorActive = false
+      if (!engineProc.running) engineProc.running = true
+    }
+  }
+
+  function moveCursor(dy) {
+    if (!cursorActive) {
+      cursorActive = true
+      selectedIndex = 0
+      return
+    }
+    var len = root.filteredArticles ? Math.min(root.filteredArticles.length, 8) : 0
+    if (len === 0) return
+    var next = selectedIndex + dy
+    if (next < 0) next = 0
+    if (next >= len) next = len - 1
+    selectedIndex = next
+  }
+
+  function activateSelected() {
+    if (!root.filteredArticles || root.filteredArticles.length === 0) return
+    var art = root.filteredArticles[selectedIndex]
+    if (art && art.url) {
+      Qt.openUrlExternally(art.url)
+    }
+  }
+
   readonly property string fontFamily: (root.bar && root.bar.fontFamily) ? root.bar.fontFamily : ((typeof Style !== "undefined" && Style.font && Style.font.family) ? Style.font.family : "JetBrainsMono Nerd Font, JetBrains Mono, monospace")
 
   readonly property var filteredArticles: {
@@ -91,11 +125,6 @@ Panel {
     }
   }
 
-  Process {
-    id: openWindowProc
-    command: ["omacomnews-dashboard"]
-  }
-
   Timer {
     interval: 30000
     running: true
@@ -135,18 +164,48 @@ Panel {
     owner: root
     bar: root.bar
     open: root.opened
+    focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(480))
     contentHeight: panel.fittedContentHeight(panelColumn.implicitHeight, Style.space(620))
 
-    ScrollView {
-      id: scrollArea
+    PanelKeyCatcher {
+      id: keyCatcher
       anchors.fill: parent
-      clip: true
-      ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-      ScrollBar.vertical.policy: panelColumn.implicitHeight > height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+      onCloseRequested: {
+        if (root.showAboutModal) {
+          root.showAboutModal = false
+        } else {
+          root.close()
+        }
+      }
+      onTabRequested: function(direction) { root.switchPanel(direction) }
+      onMoveRequested: function(dx, dy) { root.moveCursor(dy) }
+      onActivateRequested: root.activateSelected()
+      onTextKey: function(t) {
+        if (t === "r" || t === "R") {
+          if (!engineProc.running) engineProc.running = true
+        } else if (t === "a" || t === "A") {
+          root.showAboutModal = !root.showAboutModal
+        } else if (t === "1") {
+          root.currentCategory = "ALL"
+        } else if (t === "2") {
+          root.currentCategory = "NEWS"
+        } else if (t === "3") {
+          root.currentCategory = "RELEASE"
+        } else if (t === "4") {
+          root.currentCategory = "FOUNDATION"
+        }
+      }
 
-      Column {
-        id: panelColumn
+      ScrollView {
+        id: scrollArea
+        anchors.fill: parent
+        clip: true
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: panelColumn.implicitHeight > height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+
+        Column {
+          id: panelColumn
         width: scrollArea.availableWidth
         spacing: Style.space(12)
 
@@ -190,29 +249,14 @@ Panel {
               Item { Layout.fillWidth: true }
 
               Button {
-                text: "Window"
-                iconText: "\uf2d0"
-                tooltipText: "Open Standalone News Window"
+                iconText: "󰋽"
+                tooltipText: "About & Imprint"
                 foreground: root.bar ? root.bar.foreground : Color.foreground
                 accent: Color.accent
                 fontFamily: root.fontFamily
                 fontSize: Style.font.caption
                 bordered: true
-                onClicked: {
-                  root.close()
-                  openWindowProc.running = true
-                }
-              }
-
-              Button {
-                text: "Donate"
-                iconText: "\uf0f4"
-                tooltipText: "Support Omarchy Project"
-                foreground: root.bar ? root.bar.foreground : Color.foreground
-                fontFamily: root.fontFamily
-                fontSize: Style.font.caption
-                bordered: true
-                onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
+                onClicked: root.showAboutModal = !root.showAboutModal
               }
 
               // System Version Badge
@@ -289,16 +333,21 @@ Panel {
           Repeater {
             model: root.filteredArticles ? root.filteredArticles.slice(0, 8) : []
             delegate: Rectangle {
+              readonly property bool isKeyboardFocused: root.cursorActive && index === root.selectedIndex
               width: parent.width
               implicitHeight: artLayout.implicitHeight + Style.space(16)
               radius: Style.cornerRadius
-              color: Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
-              border.color: Qt.rgba(
-                (root.bar ? root.bar.foreground : Color.foreground).r,
-                (root.bar ? root.bar.foreground : Color.foreground).g,
-                (root.bar ? root.bar.foreground : Color.foreground).b,
-                0.12
-              )
+              color: isKeyboardFocused
+                     ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.18)
+                     : Style.selectedFillFor(root.bar ? root.bar.foreground : Color.foreground, Color.accent)
+              border.color: isKeyboardFocused
+                            ? Color.accent
+                            : Qt.rgba(
+                                (root.bar ? root.bar.foreground : Color.foreground).r,
+                                (root.bar ? root.bar.foreground : Color.foreground).g,
+                                (root.bar ? root.bar.foreground : Color.foreground).b,
+                                0.12
+                              )
               border.width: 1
 
               readonly property var artData: modelData
@@ -433,6 +482,91 @@ Panel {
           }
         }
       }
+    }
+
+    // About & Imprint Modal Overlay
+    Rectangle {
+      id: aboutOverlay
+      anchors.fill: parent
+      visible: root.showAboutModal
+      color: Qt.rgba(0.05, 0.05, 0.07, 0.96)
+      z: 99
+
+      MouseArea {
+        anchors.fill: parent
+        // Block underlying clicks
+      }
+
+      Column {
+        anchors.centerIn: parent
+        width: parent.width - Style.space(40)
+        spacing: Style.space(12)
+
+        Row {
+          width: parent.width
+          Item {
+            width: parent.width - closeAboutBtn.implicitWidth
+            implicitHeight: aboutTitleText.implicitHeight
+            Text {
+              id: aboutTitleText
+              text: "OmaNews"
+              color: root.bar ? root.bar.foreground : Color.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.title
+              font.bold: true
+            }
+          }
+
+          Button {
+            id: closeAboutBtn
+            text: "✕"
+            bordered: true
+            foreground: root.bar ? root.bar.foreground : Color.foreground
+            fontFamily: root.fontFamily
+            fontSize: Style.font.caption
+            onClicked: root.showAboutModal = false
+          }
+        }
+
+        Text {
+          text: "Version: 1.1.0\nDeveloper: Ozan Ozdil (@ozdil)\nLicense: MIT\nOmarchy Community News & System Release Hub"
+          color: root.bar ? root.bar.foreground : Color.foreground
+          opacity: 0.7
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+          lineHeight: 1.3
+        }
+
+        PanelSeparator {
+          width: parent.width
+          foreground: root.bar ? root.bar.foreground : Color.foreground
+        }
+
+        Button {
+          width: parent.width
+          text: "GitHub / Contact"
+          iconText: "󰊤"
+          bordered: true
+          foreground: root.bar ? root.bar.foreground : Color.foreground
+          accent: Color.accent
+          fontFamily: root.fontFamily
+          fontSize: Style.font.caption
+          onClicked: Qt.openUrlExternally("https://github.com/ozdil")
+        }
+
+        Button {
+          width: parent.width
+          text: "Buy Me a Coffee"
+          iconText: "󰅖"
+          bordered: true
+          foreground: "#000000"
+          color: "#FFDD00"
+          fontFamily: root.fontFamily
+          fontSize: Style.font.caption
+          onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
+        }
+      }
+    }
     }
   }
 }
