@@ -51,6 +51,8 @@ QtObject {
     readonly property string iconSearch: "\uf002"
     readonly property string iconSparkle: "\uf005"
     readonly property string iconFilter: "\uf0b0"
+    readonly property string iconClose: "\uf00d"
+    readonly property string iconCopy: "\uf0c5"
 
     property string lastLoadedRaw: ""
 

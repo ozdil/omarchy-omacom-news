@@ -268,7 +268,7 @@ fn main() {
                     }
                     if !copied {
                         if let Ok(mut child) = std::process::Command::new("xclip")
-                            .args(&["-selection", "clipboard"])
+                            .args(["-selection", "clipboard"])
                             .stdin(std::process::Stdio::piped())
                             .spawn()
                         {

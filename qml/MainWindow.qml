@@ -16,6 +16,8 @@ Item {
     property var articles: []
     property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
     property string searchQuery: ""
+    property var activeArticle: null
+    property bool showReaderModal: false
 
     readonly property string enginePath: {
         var base = Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "");
@@ -485,6 +487,18 @@ Item {
                             elide: Text.ElideRight
                         }
                     }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        z: -1
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.activeArticle = modelData;
+                            root.showReaderModal = true;
+                            root.markRead(modelData.id);
+                        }
+                    }
                 }
 
                 Text {
@@ -494,6 +508,282 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: 13
                     color: Theme.textMuted
+                }
+            }
+        }
+    }
+
+    // Keyboard Shortcut for Reader Modal
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.showReaderModal
+        onActivated: root.showReaderModal = false
+    }
+
+    // Full In-App Reader Modal with Jev AI Summary
+    Rectangle {
+        id: readerModal
+        anchors.fill: parent
+        visible: root.showReaderModal && root.activeArticle !== null
+        color: Qt.rgba(Theme.bgDark.r, Theme.bgDark.g, Theme.bgDark.b, 0.98)
+        z: 100
+
+        MouseArea {
+            anchors.fill: parent
+            // Block background click events
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 28
+            spacing: 16
+
+            // Header Bar
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                Rectangle {
+                    implicitWidth: readerCatText.implicitWidth + 14
+                    implicitHeight: 24
+                    radius: Theme.radiusSm
+                    color: Theme.accent
+
+                    Text {
+                        id: readerCatText
+                        anchors.centerIn: parent
+                        text: root.activeArticle ? String(root.activeArticle.category || "News").toUpperCase() : "NEWS"
+                        font.family: Theme.monoFont
+                        font.pixelSize: 11
+                        font.bold: true
+                        color: Theme.bgBase
+                    }
+                }
+
+                Text {
+                    text: root.activeArticle ? (root.activeArticle.date + " • " + (root.activeArticle.author || "Omarchy Core")) : ""
+                    font.family: Theme.monoFont
+                    font.pixelSize: 12
+                    color: Theme.textMuted
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    implicitWidth: closeReaderBtnRow.implicitWidth + 16
+                    implicitHeight: 30
+                    radius: Theme.radiusSm
+                    color: closeReaderArea.containsMouse ? Theme.bgCardHover : Theme.bgCard
+                    border.color: Theme.border
+                    border.width: 1
+
+                    RowLayout {
+                        id: closeReaderBtnRow
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Text {
+                            text: Theme.iconClose
+                            font.family: Theme.iconFont
+                            font.pixelSize: 12
+                            color: Theme.textMain
+                        }
+                        Text {
+                            text: "Close (Esc)"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            color: Theme.textMain
+                        }
+                    }
+
+                    MouseArea {
+                        id: closeReaderArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.showReaderModal = false
+                    }
+                }
+            }
+
+            // Headline
+            Text {
+                Layout.fillWidth: true
+                text: root.activeArticle ? String(root.activeArticle.title) : ""
+                font.family: Theme.fontFamily
+                font.pixelSize: 20
+                font.bold: true
+                color: Theme.textMain
+                wrapMode: Text.Wrap
+            }
+
+            // Jev AI Executive Summary Card
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: jevCardCol.implicitHeight + 24
+                radius: Theme.radiusMd
+                color: Qt.rgba(0.1, 0.14, 0.2, 0.85)
+                border.color: Qt.rgba(0.3, 0.6, 0.9, 0.4)
+                border.width: 1
+
+                ColumnLayout {
+                    id: jevCardCol
+                    anchors.fill: parent
+                    anchors.margins: 14
+                    spacing: 8
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: ""
+                            font.family: Theme.iconFont
+                            font.pixelSize: 13
+                            color: "#60a5fa"
+                        }
+
+                        Text {
+                            text: "Jev AI Summary & Analysis"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            font.bold: true
+                            color: "#93c5fd"
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Text {
+                            text: "[Omarchy Verified Dispatch]"
+                            font.family: Theme.monoFont
+                            font.pixelSize: 11
+                            color: "#34d399"
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.activeArticle ? String(root.activeArticle.excerpt || "No summary available.") : ""
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 12
+                        lineHeight: 1.4
+                        color: "#e2e8f0"
+                        wrapMode: Text.Wrap
+                    }
+                }
+            }
+
+            // Full Article Body
+            Flickable {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: width
+                contentHeight: articleBodyCol.implicitHeight
+                clip: true
+
+                ColumnLayout {
+                    id: articleBodyCol
+                    width: parent.width
+                    spacing: 16
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.activeArticle ? (root.activeArticle.excerpt || "") : ""
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        color: Theme.textMain
+                        wrapMode: Text.Wrap
+                        lineHeight: 1.5
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Published on the official Omarchy distribution channel. For commit logs, release tags, and discussion, open the full link in your web browser."
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 12
+                        color: Theme.textDim
+                        wrapMode: Text.Wrap
+                        lineHeight: 1.4
+                    }
+                }
+            }
+
+            // Bottom Actions
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
+                Rectangle {
+                    implicitWidth: openExtBtnRow.implicitWidth + 24
+                    implicitHeight: 36
+                    radius: Theme.radiusSm
+                    color: Theme.accent
+
+                    RowLayout {
+                        id: openExtBtnRow
+                        anchors.centerIn: parent
+                        spacing: 8
+                        Text {
+                            text: Theme.iconExternal
+                            font.family: Theme.iconFont
+                            font.pixelSize: 12
+                            color: Theme.bgBase
+                        }
+                        Text {
+                            text: "Open in Browser"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            font.bold: true
+                            color: Theme.bgBase
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (root.activeArticle && root.activeArticle.url) {
+                                root.openUrl(root.activeArticle.url);
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    implicitWidth: copyLinkBtnRow.implicitWidth + 24
+                    implicitHeight: 36
+                    radius: Theme.radiusSm
+                    color: Theme.bgCard
+                    border.color: Theme.border
+                    border.width: 1
+
+                    RowLayout {
+                        id: copyLinkBtnRow
+                        anchors.centerIn: parent
+                        spacing: 8
+                        Text {
+                            text: Theme.iconCopy
+                            font.family: Theme.iconFont
+                            font.pixelSize: 12
+                            color: Theme.textMain
+                        }
+                        Text {
+                            text: "Copy Link"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            color: Theme.textMain
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (root.activeArticle && root.activeArticle.url) {
+                                actionProc.command = [root.enginePath, "--copy-url", root.activeArticle.url];
+                                actionProc.running = true;
+                            }
+                        }
+                    }
                 }
             }
         }

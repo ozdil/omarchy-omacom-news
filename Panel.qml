@@ -25,6 +25,8 @@ Panel {
   property var articles: []
   property string currentCategory: "ALL" // "ALL", "NEWS", "RELEASE", "FOUNDATION"
   property bool showAboutModal: false
+  property bool showReaderModal: false
+  property var activeArticle: null
   property int selectedIndex: 0
   property bool cursorActive: false
 
@@ -71,9 +73,19 @@ Panel {
   function activateSelected() {
     if (!root.filteredArticles || root.filteredArticles.length === 0) return
     var art = root.filteredArticles[selectedIndex]
+    if (art) {
+      root.activeArticle = art
+      root.showReaderModal = true
+      if (art.id && !art.is_read) root.sendCmd("--mark-read-single", art.id)
+    }
+  }
+
+  function openSelectedExternally() {
+    if (!root.filteredArticles || root.filteredArticles.length === 0) return
+    var art = root.filteredArticles[selectedIndex]
     if (art && art.url) {
       Qt.openUrlExternally(art.url)
-      if (art.id) root.sendCmd("--mark-read-single", art.id)
+      if (art.id && !art.is_read) root.sendCmd("--mark-read-single", art.id)
     }
   }
 
@@ -206,7 +218,9 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
       onCloseRequested: {
-        if (root.showAboutModal) {
+        if (root.showReaderModal) {
+          root.showReaderModal = false
+        } else if (root.showAboutModal) {
           root.showAboutModal = false
         } else {
           root.close()
@@ -220,6 +234,8 @@ Panel {
           if (!engineProc.running) engineProc.running = true
         } else if (t === "c" || t === "C") {
           root.copySelectedUrl()
+        } else if (t === "o" || t === "O") {
+          root.openSelectedExternally()
         } else if (t === "a" || t === "A") {
           root.showAboutModal = !root.showAboutModal
         } else if (t === "1") {
@@ -494,10 +510,15 @@ Panel {
               MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                  if (artData && artData.url) {
-                    Qt.openUrlExternally(artData.url)
-                    if (artData.id) root.sendCmd("--mark-read-single", artData.id)
+                onClicked: function(mouse) {
+                  if (artData) {
+                    if (mouse.modifiers & Qt.ShiftModifier) {
+                      if (artData.url) Qt.openUrlExternally(artData.url)
+                    } else {
+                      root.activeArticle = artData
+                      root.showReaderModal = true
+                    }
+                    if (artData.id && !artData.is_read) root.sendCmd("--mark-read-single", artData.id)
                   }
                 }
               }
@@ -614,14 +635,231 @@ Panel {
 
         Button {
           width: parent.width
-          text: "Buy Me a Coffee"
-          iconText: "󰅖"
+          text: "Documentation & Repository"
+          iconText: ""
           bordered: true
-          foreground: "#000000"
-          color: "#FFDD00"
+          foreground: root.bar ? root.bar.foreground : Color.foreground
+          accent: Color.accent
           fontFamily: root.fontFamily
           fontSize: Style.font.caption
-          onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
+          onClicked: Qt.openUrlExternally("https://github.com/ozdil/omarchy-omacom-news")
+        }
+      }
+    }
+
+    // ---------- In-Panel Reader Modal with Jev AI Summary ----------
+    Rectangle {
+      id: readerModal
+      anchors.fill: parent
+      visible: root.showReaderModal && root.activeArticle !== null
+      color: Qt.rgba(0.04, 0.04, 0.06, 0.98)
+      z: 98
+
+      MouseArea {
+        anchors.fill: parent
+        // Prevent clicking background items
+      }
+
+      ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Style.space(16)
+        spacing: Style.space(10)
+
+        // Top Navigation Bar
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Style.space(8)
+
+          // Category Badge
+          Rectangle {
+            implicitWidth: catBadgeText.implicitWidth + Style.space(12)
+            implicitHeight: Style.space(20)
+            radius: Style.space(4)
+            color: Color.accent
+
+            Text {
+              id: catBadgeText
+              anchors.centerIn: parent
+              textFormat: Text.PlainText
+              text: root.activeArticle ? String(root.activeArticle.category || "News").toUpperCase() : "NEWS"
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              font.bold: true
+              color: root.bar ? root.bar.background : Color.background
+            }
+          }
+
+          Text {
+            textFormat: Text.PlainText
+            text: root.activeArticle ? (root.activeArticle.date + " • " + (root.activeArticle.author || "Omarchy Core")) : ""
+            color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.4)
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            Layout.fillWidth: true
+            elide: Text.ElideRight
+          }
+
+          Button {
+            text: "✕ Close (Esc)"
+            bordered: true
+            foreground: root.bar ? root.bar.foreground : Color.foreground
+            fontFamily: root.fontFamily
+            fontSize: Style.font.caption
+            onClicked: root.showReaderModal = false
+          }
+        }
+
+        // Headline
+        Text {
+          Layout.fillWidth: true
+          textFormat: Text.PlainText
+          text: root.activeArticle ? String(root.activeArticle.title) : ""
+          color: root.bar ? root.bar.foreground : Color.foreground
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.headline
+          font.bold: true
+          wrapMode: Text.Wrap
+          maximumLineCount: 3
+          elide: Text.ElideRight
+        }
+
+        // Jev AI Executive Summary Card (TL;DR)
+        Rectangle {
+          Layout.fillWidth: true
+          implicitHeight: jevCol.implicitHeight + Style.space(16)
+          radius: Style.space(6)
+          color: Qt.rgba(0.12, 0.16, 0.22, 0.8)
+          border.color: Qt.rgba(0.3, 0.6, 0.9, 0.4)
+          border.width: 1
+
+          ColumnLayout {
+            id: jevCol
+            anchors.fill: parent
+            anchors.margins: Style.space(10)
+            spacing: Style.space(6)
+
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: Style.space(6)
+
+              Text {
+                text: ""
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                color: "#60a5fa"
+              }
+
+              Text {
+                text: "Jev AI Summary & Analysis"
+                textFormat: Text.PlainText
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                font.bold: true
+                color: "#93c5fd"
+              }
+
+              Item { Layout.fillWidth: true }
+
+              Text {
+                text: "[Verified Feed]"
+                textFormat: Text.PlainText
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                color: "#34d399"
+              }
+            }
+
+            Text {
+              Layout.fillWidth: true
+              textFormat: Text.PlainText
+              text: root.activeArticle ? String(root.activeArticle.excerpt || "No summary available.") : ""
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              lineHeight: 1.35
+              color: "#e2e8f0"
+              wrapMode: Text.Wrap
+            }
+          }
+        }
+
+        // Article Content Scroll Area
+        Flickable {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          contentWidth: width
+          contentHeight: contentCol.implicitHeight
+          clip: true
+
+          ColumnLayout {
+            id: contentCol
+            width: parent.width
+            spacing: Style.space(12)
+
+            Text {
+              Layout.fillWidth: true
+              textFormat: Text.PlainText
+              text: root.activeArticle ? (root.activeArticle.excerpt || "Article details are loading or available at external source.") : ""
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              color: root.bar ? root.bar.foreground : Color.foreground
+              wrapMode: Text.Wrap
+              lineHeight: 1.4
+            }
+
+            Text {
+              Layout.fillWidth: true
+              textFormat: Text.PlainText
+              text: "Published for the Omarchy community distribution channel. For the full release notes, pull requests, and commit logs, you can open this article directly in your default browser."
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              color: Qt.darker(root.bar ? root.bar.foreground : Color.foreground, 1.6)
+              wrapMode: Text.Wrap
+              lineHeight: 1.3
+            }
+          }
+        }
+
+        // Bottom Action Bar
+        PanelSeparator {
+          Layout.fillWidth: true
+          foreground: root.bar ? root.bar.foreground : Color.foreground
+        }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Style.space(8)
+
+          Button {
+            Layout.fillWidth: true
+            text: "Open in Browser (o)"
+            iconText: "󰅖"
+            bordered: true
+            foreground: root.bar ? root.bar.foreground : Color.foreground
+            accent: Color.accent
+            fontFamily: root.fontFamily
+            fontSize: Style.font.caption
+            onClicked: {
+              if (root.activeArticle && root.activeArticle.url) {
+                Qt.openUrlExternally(root.activeArticle.url)
+              }
+            }
+          }
+
+          Button {
+            implicitWidth: Style.space(110)
+            text: "Copy Link (c)"
+            iconText: ""
+            bordered: true
+            foreground: root.bar ? root.bar.foreground : Color.foreground
+            fontFamily: root.fontFamily
+            fontSize: Style.font.caption
+            onClicked: {
+              if (root.activeArticle && root.activeArticle.url) {
+                root.sendCmd("--copy-url", root.activeArticle.url)
+                root.triggerToast("URL copied to clipboard")
+              }
+            }
+          }
         }
       }
     }
