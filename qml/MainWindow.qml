@@ -34,6 +34,8 @@ Item {
 
             if (root.currentCategory === "RELEASE" && a.category !== "Release") continue;
             if (root.currentCategory === "FOUNDATION" && a.category !== "Foundation") continue;
+            if (root.currentCategory === "DISTRO" && a.category !== "Distro") continue;
+            if (root.currentCategory === "ECOSYSTEM" && (a.category !== "Ecosystem" && a.category !== "Community")) continue;
             if (root.currentCategory === "NEWS" && a.category === "Release") continue;
 
             if (query.length > 0) {
@@ -55,7 +57,7 @@ Item {
     }
 
     function markRead(id) {
-        actionProc.command = [root.enginePath, "--mark-read", id];
+        actionProc.command = [root.enginePath, "--mark-read-single", id];
         actionProc.running = true;
     }
 
@@ -65,7 +67,11 @@ Item {
     }
 
     function openUrl(url) {
-        Qt.openUrlExternally(url);
+        if (!url) return;
+        var u = String(url).trim().toLowerCase();
+        if (u.indexOf("http://") === 0 || u.indexOf("https://") === 0) {
+            Qt.openUrlExternally(url);
+        }
     }
 
     Process {
@@ -75,7 +81,8 @@ Item {
             waitForEnd: true
             onStreamFinished: {
                 try {
-                    var data = JSON.parse(text || "{}");
+                    var raw = String(text || "").slice(0, 1048576);
+                    var data = JSON.parse(raw || "{}");
                     root.totalCount = Number(data.total) || 0;
                     root.unreadCount = Number(data.unread) || 0;
                     root.installedVersion = data.installed_version || "";
@@ -261,7 +268,9 @@ Item {
                             { id: "ALL", name: "All Dispatches" },
                             { id: "NEWS", name: "News" },
                             { id: "RELEASE", name: "Releases" },
-                            { id: "FOUNDATION", name: "Foundation" }
+                            { id: "FOUNDATION", name: "Foundation" },
+                            { id: "DISTRO", name: "Distro" },
+                            { id: "ECOSYSTEM", name: "Ecosystem" }
                         ]
 
                         delegate: Rectangle {

@@ -88,6 +88,12 @@ Panel {
     if (currentCategory === "FOUNDATION") {
       return root.articles.filter(function(a) { return a && a.category === "Foundation" })
     }
+    if (currentCategory === "DISTRO") {
+      return root.articles.filter(function(a) { return a && a.category === "Distro" })
+    }
+    if (currentCategory === "ECOSYSTEM") {
+      return root.articles.filter(function(a) { return a && (a.category === "Ecosystem" || a.category === "Community") })
+    }
     if (currentCategory === "NEWS") {
       return root.articles.filter(function(a) { return a && a.category !== "Release" })
     }
@@ -224,6 +230,10 @@ Panel {
           root.currentCategory = "RELEASE"
         } else if (t === "4") {
           root.currentCategory = "FOUNDATION"
+        } else if (t === "5") {
+          root.currentCategory = "DISTRO"
+        } else if (t === "6") {
+          root.currentCategory = "ECOSYSTEM"
         }
       }
 
@@ -333,7 +343,9 @@ Panel {
               { id: "ALL", label: "All (" + root.totalCount + ")" },
               { id: "NEWS", label: "News" },
               { id: "RELEASE", label: "Releases" },
-              { id: "FOUNDATION", label: "Foundation" }
+              { id: "FOUNDATION", label: "Foundation" },
+              { id: "DISTRO", label: "Distro" },
+              { id: "ECOSYSTEM", label: "Ecosystem" }
             ]
             delegate: Button {
               Layout.fillWidth: true
@@ -575,7 +587,7 @@ Panel {
         }
 
         Text {
-          text: "Version: 1.3.0\nDeveloper: Ozan Ozdil (@ozdil)\nLicense: MIT\nOmarchy Community News & System Release Hub"
+          text: "Version: 1.4.0\nDeveloper: Ozan Ozdil (@ozdil)\nLicense: MIT\nOmarchy Community News & System Release Hub"
           color: root.bar ? root.bar.foreground : Color.foreground
           opacity: 0.7
           font.family: root.fontFamily

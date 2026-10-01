@@ -1,6 +1,6 @@
 # Maintainer: Ozan Özdil <ozan@pm.me>
 pkgname=omarchy-omacom-news
-pkgver=1.3.0
+pkgver=1.4.0
 pkgrel=1
 pkgdesc="Official Omarchy Linux news dispatches, distro releases, and desktop notification engine"
 arch=('x86_64')

@@ -50,7 +50,7 @@ pub fn fetch_feed_bounded(url: &str, cache_name: &str) -> Option<String> {
             "--max-time",
             "3",
             "-A",
-            "OmaNews/1.2.0 (Omarchy Linux)",
+            "OmaNews/1.4.0 (Omarchy Linux)",
             url,
         ],
         &[],
@@ -237,9 +237,13 @@ fn main() {
         if let Some(idx) = args.iter().position(|a| a == "--read") {
             if idx + 1 < args.len() {
                 let target_url = &args[idx + 1];
-                let _ = std::process::Command::new("/usr/bin/xdg-open")
-                    .arg(target_url)
-                    .spawn();
+                if target_url.starts_with("https://") || target_url.starts_with("http://") {
+                    let _ = std::process::Command::new("/usr/bin/xdg-open")
+                        .arg(target_url)
+                        .spawn();
+                } else {
+                    eprintln!("Security Warning: Rejected invalid URL scheme");
+                }
             }
         }
         return;
@@ -249,21 +253,9 @@ fn main() {
         if let Some(idx) = args.iter().position(|a| a == "--copy-url") {
             if idx + 1 < args.len() {
                 let url = &args[idx + 1];
-                let mut copied = false;
-                if let Ok(mut child) = std::process::Command::new("wl-copy")
-                    .stdin(std::process::Stdio::piped())
-                    .spawn()
-                {
-                    use std::io::Write;
-                    if let Some(mut stdin) = child.stdin.take() {
-                        let _ = stdin.write_all(url.as_bytes());
-                    }
-                    let _ = child.wait();
-                    copied = true;
-                }
-                if !copied {
-                    if let Ok(mut child) = std::process::Command::new("xclip")
-                        .args(&["-selection", "clipboard"])
+                if url.starts_with("https://") || url.starts_with("http://") {
+                    let mut copied = false;
+                    if let Ok(mut child) = std::process::Command::new("wl-copy")
                         .stdin(std::process::Stdio::piped())
                         .spawn()
                     {
@@ -272,29 +264,59 @@ fn main() {
                             let _ = stdin.write_all(url.as_bytes());
                         }
                         let _ = child.wait();
+                        copied = true;
                     }
+                    if !copied {
+                        if let Ok(mut child) = std::process::Command::new("xclip")
+                            .args(&["-selection", "clipboard"])
+                            .stdin(std::process::Stdio::piped())
+                            .spawn()
+                        {
+                            use std::io::Write;
+                            if let Some(mut stdin) = child.stdin.take() {
+                                let _ = stdin.write_all(url.as_bytes());
+                            }
+                            let _ = child.wait();
+                        }
+                    }
+                    println!("Dispatched URL to clipboard: {}", url);
+                } else {
+                    eprintln!("Security Warning: Rejected invalid URL scheme");
                 }
-                println!("Dispatched URL to clipboard: {}", url);
             }
         }
         return;
     }
 
-    if args.iter().any(|a| a == "--mark-read-single") {
-        if let Some(idx) = args.iter().position(|a| a == "--mark-read-single") {
-            if idx + 1 < args.len() {
-                let target_id = &args[idx + 1];
-                let mut state = load_state();
-                if !state.read_ids.contains(target_id) {
-                    state.read_ids.push(target_id.clone());
-                    let _ = save_state(&state);
-                }
+    // Single article mark read: --mark-read-single <id> or --mark-read <id> (when id is not an option flag)
+    if let Some(idx) = args.iter().position(|a| a == "--mark-read-single") {
+        if idx + 1 < args.len() && !args[idx + 1].starts_with("--") {
+            let target_id = &args[idx + 1];
+            let mut state = load_state();
+            if !state.read_ids.contains(target_id) {
+                state.read_ids.push(target_id.clone());
+                let _ = save_state(&state);
             }
+            println!("Article {} marked as read.", target_id);
+            return;
         }
-        return;
     }
 
-    if args.iter().any(|a| a == "--mark-read") {
+    if let Some(idx) = args.iter().position(|a| a == "--mark-read") {
+        if idx + 1 < args.len() && !args[idx + 1].starts_with("--") {
+            let target_id = &args[idx + 1];
+            let mut state = load_state();
+            if !state.read_ids.contains(target_id) {
+                state.read_ids.push(target_id.clone());
+                let _ = save_state(&state);
+            }
+            println!("Article {} marked as read.", target_id);
+            return;
+        }
+    }
+
+    // Mark all read: --mark-all-read or bare --mark-read
+    if args.iter().any(|a| a == "--mark-all-read" || a == "--mark-read") {
         let mut state = load_state();
         for a in &articles {
             if !state.read_ids.contains(&a.id) {
