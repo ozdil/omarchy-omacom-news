@@ -3,9 +3,9 @@
   "id": "ozdil.omacom-news",
   "name": "OmaNews",
   "version": "1.4.0",
-  "author": "Ozan \u00d6zdil (ozdil)",
+  "author": "Ozan Özdil (ozdil)",
   "license": "MIT",
-  "description": "Official Omarchy news dispatches, distro releases, and desktop announcements.",
+  "description": "Official Omarchy news dispatches, distro releases, category filters, and in-app ReaderModal with Jev AI summary.",
   "kinds": [
     "bar-widget"
   ],
@@ -15,7 +15,7 @@
   },
   "barWidget": {
     "displayName": "OmaNews",
-    "description": "Omarchy news dispatches, distro releases, and desktop notification center.",
+    "description": "Omarchy news dispatches, distro release feeds, and Jev AI reader.",
     "category": "System",
     "defaultSection": "right",
     "aliases": [

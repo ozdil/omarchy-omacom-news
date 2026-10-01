@@ -4,6 +4,8 @@
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support_Development-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/ozdil)
 
+![OmaNews Preview](preview.png)
+
 Official Omarchy Linux news dispatches, distribution releases, and desktop notification hub for Omarchy Linux.
 
 Author: Ozan Ozdil (ozdil)  
