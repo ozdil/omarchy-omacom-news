@@ -644,6 +644,18 @@ Panel {
           fontSize: Style.font.caption
           onClicked: Qt.openUrlExternally("https://github.com/ozdil/omarchy-omacom-news")
         }
+
+        Button {
+          width: parent.width
+          text: "Buy Me a Coffee"
+          iconText: ""
+          bordered: true
+          foreground: "#000000"
+          color: "#FFDD00"
+          fontFamily: root.fontFamily
+          fontSize: Style.font.caption
+          onClicked: Qt.openUrlExternally("https://buymeacoffee.com/ozdil")
+        }
       }
     }
 
