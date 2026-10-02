@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "ozdil.omacom-news",
   "name": "OmaNews",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": "Ozan Özdil (ozdil)",
   "license": "MIT",
   "description": "Official Omarchy news dispatches, distro releases, category filters, and in-app ReaderModal with Jev AI summary.",

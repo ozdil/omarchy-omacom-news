@@ -1,6 +1,6 @@
 [package]
 name = "omacomnews-engine"
-version = "1.4.0"
+version = "1.4.1"
 edition = "2021"
 authors = ["Ozan Özdil <ozan@pm.me>"]
 description = "Omarchy Linux news, distro releases, and desktop notification engine"

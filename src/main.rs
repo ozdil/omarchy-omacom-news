@@ -50,7 +50,7 @@ pub fn fetch_feed_bounded(url: &str, cache_name: &str) -> Option<String> {
             "--max-time",
             "3",
             "-A",
-            "OmaNews/1.4.0 (Omarchy Linux)",
+            "OmaNews/1.4.1 (Omarchy Linux)",
             url,
         ],
         &[],
