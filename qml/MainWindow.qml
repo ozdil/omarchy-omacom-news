@@ -126,6 +126,7 @@ Item {
                 spacing: 12
 
                 Text {
+                    textFormat: Text.PlainText
                     text: Theme.iconNews
                     font.family: Theme.iconFont
                     font.pixelSize: 24
@@ -135,6 +136,7 @@ Item {
                 ColumnLayout {
                     spacing: 2
                     Text {
+                        textFormat: Text.PlainText
                         text: "OMANEWS COMMUNITY DISPATCH"
                         font.family: Theme.fontFamily
                         font.pixelSize: 15
@@ -142,6 +144,7 @@ Item {
                         color: Theme.textMain
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: "Omarchy Core Dispatches, Releases & Ecosystem Feeds"
                         font.family: Theme.fontFamily
                         font.pixelSize: 11
@@ -166,6 +169,7 @@ Item {
                         spacing: 8
 
                         Text {
+                            textFormat: Text.PlainText
                             text: "Omarchy " + (root.installedVersion || "4.0.4-1")
                             font.family: Theme.monoFont
                             font.pixelSize: 11
@@ -173,6 +177,7 @@ Item {
                         }
                         Rectangle { width: 1; height: 14; color: Theme.border }
                         Text {
+                            textFormat: Text.PlainText
                             text: root.isSystemUpdated ? "Up to date" : ("New: " + root.latestRelease)
                             font.family: Theme.monoFont
                             font.pixelSize: 11
@@ -197,12 +202,14 @@ Item {
                         spacing: 6
 
                         Text {
+                            textFormat: Text.PlainText
                             text: Theme.iconCheckAll
                             font.family: Theme.iconFont
                             font.pixelSize: 12
                             color: Theme.textMain
                         }
                         Text {
+                            textFormat: Text.PlainText
                             text: "Mark All Read"
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
@@ -228,6 +235,7 @@ Item {
                     border.width: 1
 
                     Text {
+                        textFormat: Text.PlainText
                         anchors.centerIn: parent
                         text: Theme.iconRefresh
                         font.family: Theme.iconFont
@@ -282,6 +290,7 @@ Item {
                             color: root.currentCategory === modelData.id ? Theme.bgCardHover : "transparent"
 
                             Text {
+                                textFormat: Text.PlainText
                                 id: tabLabel
                                 anchors.centerIn: parent
                                 text: modelData.name
@@ -317,6 +326,7 @@ Item {
                     spacing: 8
 
                     Text {
+                        textFormat: Text.PlainText
                         text: Theme.iconSearch
                         font.family: Theme.iconFont
                         font.pixelSize: 13
@@ -333,6 +343,7 @@ Item {
                         onTextChanged: root.searchQuery = text
 
                         Text {
+                            textFormat: Text.PlainText
                             anchors.fill: parent
                             text: "Search news dispatches, release notes, authors..."
                             font.family: Theme.fontFamily
@@ -390,6 +401,7 @@ Item {
                                 border.width: 1
 
                                 Text {
+                                    textFormat: Text.PlainText
                                     id: catBadgeText
                                     anchors.centerIn: parent
                                     text: modelData.category || "News"
@@ -401,6 +413,7 @@ Item {
 
                             // Title
                             Text {
+                                textFormat: Text.PlainText
                                 Layout.fillWidth: true
                                 text: modelData.title || ""
                                 font.family: Theme.fontFamily
@@ -412,6 +425,7 @@ Item {
 
                             // Author and Date
                             Text {
+                                textFormat: Text.PlainText
                                 text: (modelData.author ? (modelData.author + " • ") : "") + (modelData.date || "")
                                 font.family: Theme.monoFont
                                 font.pixelSize: 11
@@ -429,6 +443,7 @@ Item {
                                 border.width: 1
 
                                 Text {
+                                    textFormat: Text.PlainText
                                     anchors.centerIn: parent
                                     text: Theme.iconCheck
                                     font.family: Theme.iconFont
@@ -455,6 +470,7 @@ Item {
                                 border.width: 1
 
                                 Text {
+                                    textFormat: Text.PlainText
                                     anchors.centerIn: parent
                                     text: Theme.iconExternal
                                     font.family: Theme.iconFont
@@ -477,6 +493,7 @@ Item {
 
                         // Excerpt Text
                         Text {
+                            textFormat: Text.PlainText
                             Layout.fillWidth: true
                             text: modelData.excerpt || ""
                             font.family: Theme.fontFamily
@@ -502,6 +519,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     visible: root.displayArticles.length === 0
                     text: "No articles match the current filter or search criteria."
@@ -550,6 +568,7 @@ Item {
                     color: Theme.accent
 
                     Text {
+                        textFormat: Text.PlainText
                         id: readerCatText
                         anchors.centerIn: parent
                         text: root.activeArticle ? String(root.activeArticle.category || "News").toUpperCase() : "NEWS"
@@ -561,6 +580,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     text: root.activeArticle ? (root.activeArticle.date + " • " + (root.activeArticle.author || "Omarchy Core")) : ""
                     font.family: Theme.monoFont
                     font.pixelSize: 12
@@ -582,12 +602,14 @@ Item {
                         anchors.centerIn: parent
                         spacing: 6
                         Text {
+                            textFormat: Text.PlainText
                             text: Theme.iconClose
                             font.family: Theme.iconFont
                             font.pixelSize: 12
                             color: Theme.textMain
                         }
                         Text {
+                            textFormat: Text.PlainText
                             text: "Close (Esc)"
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
@@ -607,6 +629,7 @@ Item {
 
             // Headline
             Text {
+                textFormat: Text.PlainText
                 Layout.fillWidth: true
                 text: root.activeArticle ? String(root.activeArticle.title) : ""
                 font.family: Theme.fontFamily
@@ -636,6 +659,7 @@ Item {
                         spacing: 8
 
                         Text {
+                            textFormat: Text.PlainText
                             text: ""
                             font.family: Theme.iconFont
                             font.pixelSize: 13
@@ -643,6 +667,7 @@ Item {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             text: "Jev AI Summary & Analysis"
                             font.family: Theme.fontFamily
                             font.pixelSize: 12
@@ -653,6 +678,7 @@ Item {
                         Item { Layout.fillWidth: true }
 
                         Text {
+                            textFormat: Text.PlainText
                             text: "[Omarchy Verified Dispatch]"
                             font.family: Theme.monoFont
                             font.pixelSize: 11
@@ -661,6 +687,7 @@ Item {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         Layout.fillWidth: true
                         text: root.activeArticle ? String(root.activeArticle.excerpt || "No summary available.") : ""
                         font.family: Theme.fontFamily
@@ -686,6 +713,7 @@ Item {
                     spacing: 16
 
                     Text {
+                        textFormat: Text.PlainText
                         Layout.fillWidth: true
                         text: root.activeArticle ? (root.activeArticle.excerpt || "") : ""
                         font.family: Theme.fontFamily
@@ -696,6 +724,7 @@ Item {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         Layout.fillWidth: true
                         text: "Published on the official Omarchy distribution channel. For commit logs, release tags, and discussion, open the full link in your web browser."
                         font.family: Theme.fontFamily
@@ -723,12 +752,14 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
                         Text {
+                            textFormat: Text.PlainText
                             text: Theme.iconExternal
                             font.family: Theme.iconFont
                             font.pixelSize: 12
                             color: Theme.bgBase
                         }
                         Text {
+                            textFormat: Text.PlainText
                             text: "Open in Browser"
                             font.family: Theme.fontFamily
                             font.pixelSize: 12
@@ -761,12 +792,14 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
                         Text {
+                            textFormat: Text.PlainText
                             text: Theme.iconCopy
                             font.family: Theme.iconFont
                             font.pixelSize: 12
                             color: Theme.textMain
                         }
                         Text {
+                            textFormat: Text.PlainText
                             text: "Copy Link"
                             font.family: Theme.fontFamily
                             font.pixelSize: 12

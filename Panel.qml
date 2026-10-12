@@ -638,6 +638,7 @@ Panel {
               anchors.verticalCenter: parent.verticalCenter
 
               Text {
+                textFormat: Text.PlainText
                 id: aboutTitleText
                 text: root.pluginName
                 color: root.bar ? root.bar.foreground : Color.foreground
@@ -657,6 +658,7 @@ Panel {
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {
+                  textFormat: Text.PlainText
                   id: verifBadgeText
                   anchors.centerIn: parent
                   text: "VERIFIED"
@@ -681,6 +683,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           width: parent.width
           wrapMode: Text.WordWrap
           text: "Sürüm: " + root.pluginVersion + "\nGeliştirici: " + root.pluginAuthor + "\nLisans: " + root.pluginLicense + "\n\n" + root.pluginDescription
@@ -830,6 +833,7 @@ Panel {
               spacing: Style.space(6)
 
               Text {
+                textFormat: Text.PlainText
                 text: ""
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
