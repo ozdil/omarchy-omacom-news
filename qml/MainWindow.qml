@@ -333,24 +333,17 @@ Item {
                         color: Theme.textMuted
                     }
 
-                    TextInput {
+                    BoundedTextInput {
                         id: searchInput
                         Layout.fillWidth: true
                         font.family: Theme.fontFamily
                         font.pixelSize: 12
                         color: Theme.textMain
-                        clip: true
+                        verticalAlignment: TextEdit.AlignVCenter
+                        placeholderText: "Search news dispatches, release notes, authors..."
+                        placeholderTextColor: Theme.textDim
+                        maxLength: 128
                         onTextChanged: root.searchQuery = text
-
-                        Text {
-                            textFormat: Text.PlainText
-                            anchors.fill: parent
-                            text: "Search news dispatches, release notes, authors..."
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 12
-                            color: Theme.textDim
-                            visible: !searchInput.text && !searchInput.activeFocus
-                        }
                     }
                 }
             }
