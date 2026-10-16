@@ -29,7 +29,7 @@ Panel {
   readonly property string manifestFallbackPath: (Quickshell.env("HOME") || "/home/ozdil") + "/.config/omarchy/plugins/ozdil.omacom-news/manifest.json"
 
   property string pluginName: "OmaNews"
-  property string pluginVersion: "1.4.1"
+  property string pluginVersion: "1.4.2"
   property string pluginDescription: "Official Omarchy news dispatches, distro releases, category filters, and in-app ReaderModal with Jev AI summary."
   property string pluginAuthor: "Ozan Özdil (ozdil)"
   property string pluginLicense: "MIT"
@@ -806,7 +806,7 @@ Panel {
           text: root.activeArticle ? String(root.activeArticle.title) : ""
           color: root.bar ? root.bar.foreground : Color.foreground
           font.family: root.fontFamily
-          font.pixelSize: Style.font.headline
+          font.pixelSize: Style.font.heading
           font.bold: true
           wrapMode: Text.Wrap
           maximumLineCount: 3
